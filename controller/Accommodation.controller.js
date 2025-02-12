@@ -22,37 +22,63 @@ const createAccommodation = async (req, res) => {
 // Get all Accommodations with Search and Filter Functionality
 const getAllAccommodations = async (req, res) => {
   try {
-    const { name, type, city, state, country, minPrice, maxPrice, minRating, maxRating } = req.query;
+    const { 
+      name, type, city, state, country, 
+      minPrice, maxPrice, minRating, maxRating 
+    } = req.query;
 
-    // Build search filter
+    // Initialize the filter object
     const filter = {};
-    
-    // Search by name, type, city, state, and country (case-insensitive)
-    if (name) filter.name = { $regex: name, $options: 'i' };
-    if (type) filter.type = { $regex: type, $options: 'i' };
-    if (city) filter['location.city'] = { $regex: city, $options: 'i' };
-    if (state) filter['location.state'] = { $regex: state, $options: 'i' };
-    if (country) filter['location.country'] = { $regex: country, $options: 'i' };
+    let search = false;
 
-    // Filter by price range (assuming 'price' is a field in your model)
-    if (minPrice) filter.price = { ...filter.price, $gte: parseFloat(minPrice) };
-    if (maxPrice) filter.price = { ...filter.price, $lte: parseFloat(maxPrice) };
+    // If any search parameters (name, type, city, state, country) are provided
+    if (name || type || city || state || country) {
+      search = true;
 
-    // Filter by rating range (assuming 'rating' is a field in your model)
-    if (minRating) filter.rating = { ...filter.rating, $gte: parseFloat(minRating) };
-    if (maxRating) filter.rating = { ...filter.rating, $lte: parseFloat(maxRating) };
+      // Apply search filters (case-insensitive matching using regex)
+      if (name) filter.name = { $regex: name, $options: 'i' };
+      if (type) filter.type = { $regex: type, $options: 'i' };
+      if (city) filter['location.city'] = { $regex: city, $options: 'i' };
+      if (state) filter['location.state'] = { $regex: state, $options: 'i' };
+      if (country) filter['location.country'] = { $regex: country, $options: 'i' };
+    }
 
-    // Fetch accommodations based on the filter
+    // If filter parameters (price, rating) are provided
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = parseFloat(minPrice);
+      if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
+    }
+
+    if (minRating || maxRating) {
+      filter.rating = {};
+      if (minRating) filter.rating.$gte = parseFloat(minRating);
+      if (maxRating) filter.rating.$lte = parseFloat(maxRating);
+    }
+
+    // Fetch the accommodations based on search or filter criteria
     const accommodations = await Accommodation.find(filter);
 
-    // Return the result
-    res.status(200).json({
-      status: true,
-      data: accommodations,
-      message: accommodations.length
-        ? 'Accommodations retrieved successfully.'
-        : 'No accommodations found matching your criteria.',
-    });
+    // Return the result based on search or filter
+    if (search) {
+      // If it's a search request, return the search result only
+      res.status(200).json({
+        status: true,
+        data: accommodations,
+        message: accommodations.length
+          ? 'Search results retrieved successfully.'
+          : 'No accommodations found matching your search criteria.',
+      });
+    } else {
+      // If it's just a filter request, return the filtered result only
+      res.status(200).json({
+        status: true,
+        data: accommodations,
+        message: accommodations.length
+          ? 'Filtered accommodations retrieved successfully.'
+          : 'No accommodations found matching your filter criteria.',
+      });
+    }
   } catch (error) {
     res.status(500).json({
       status: false,
@@ -61,6 +87,7 @@ const getAllAccommodations = async (req, res) => {
     });
   }
 };
+
 
 // Get a single Accommodation by ID
 const getAccommodationById = async (req, res) => {
