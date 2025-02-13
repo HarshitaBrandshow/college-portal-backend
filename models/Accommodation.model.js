@@ -22,10 +22,9 @@ const accommodationSchema = new mongoose.Schema(
     amenities: { type: [String], required: true },    // List of amenities (Wi-Fi, Gym, etc.)
     phone: { type: String, required: true },          // Contact phone number
     email: { type: String, required: true },          // Contact email address
-    images: [                                          // Array of image objects for the property
+    images: [                                          // Array of image URLs
       {
-        url: { type: String, required: true },         // URL to the image file
-        description: { type: String }                  // Description or caption for the image (optional)
+        url: { type: String, required: true }         // URL to the image file
       }
     ],
     status: { type: Boolean, default: true },         // Status (active or inactive)
@@ -51,7 +50,7 @@ const accommodationSchema = new mongoose.Schema(
     facilities: {                                     // Additional facilities
       wifi: { available: { type: Boolean }, speed_mbps: { type: Number } },
       heating_cooling: {
-        heating_type: { type: [String] },                // Types of heating
+        heating_type: { type: [String] },         // Types of heating
         cooling_type: { type: [String] },                // Types of cooling
       },
       parking: { available: { type: Boolean }, type: { type: [String] } },
@@ -70,8 +69,6 @@ const accommodationSchema = new mongoose.Schema(
         date_posted: { type: Date },
       }
     ],
-
-    
   },
   {
     timestamps: true, // Automatically add createdAt and updatedAt fields
