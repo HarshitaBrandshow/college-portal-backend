@@ -1,8 +1,8 @@
-const  { PopularCity } = require('../models'); 
+const { PopularCity } = require('../models'); 
 
 // Create a new city
 const createCity = async (req, res) => {
-  const { name, state, country, status } = req.body;
+  const { name, state, country, status, img } = req.body;
 
   try {
     const existingCity = await PopularCity.findOne({ name });
@@ -15,6 +15,7 @@ const createCity = async (req, res) => {
       state,
       country: country || 'India',
       status: status !== undefined ? status : true,
+      img: img || '', // Default to empty string if no image provided
     });
 
     await newCity.save();
@@ -81,7 +82,7 @@ const getCityByName = async (req, res) => {
 // Update city by ID
 const updateCity = async (req, res) => {
   const { id } = req.params;
-  const { name, state, country, status } = req.body;
+  const { name, state, country, status, img } = req.body;
 
   try {
     const city = await PopularCity.findById(id);
@@ -93,6 +94,7 @@ const updateCity = async (req, res) => {
     city.state = state || city.state;
     city.country = country || city.country;
     city.status = status !== undefined ? status : city.status;
+    city.img = img || city.img; // Update img field if provided, otherwise retain current image
 
     await city.save();
     res.status(200).json({ status: 'success', message: 'City updated successfully', data: city });
@@ -121,9 +123,9 @@ const deleteCity = async (req, res) => {
 };
 
 module.exports = {
-    createCity,
-    getAllCities,
-    getCityByName,
-    updateCity,
-    deleteCity,
-    };
+  createCity,
+  getAllCities,
+  getCityByName,
+  updateCity,
+  deleteCity,
+};

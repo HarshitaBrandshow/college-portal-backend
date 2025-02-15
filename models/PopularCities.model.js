@@ -20,8 +20,12 @@ const PopularCitySchema = new mongoose.Schema({
   status: {
     type: Boolean,
     default: true, 
+  },
+  img: {
+    type: String, // The field to store the image URL or path
+    trim: true, // Optional, to ensure no extra spaces are stored
   }
-}, { timestamps: true }); 
+}, { timestamps: true });
 
 // Create and export the model
 const PopularCity = mongoose.model('PopularCity', PopularCitySchema);
