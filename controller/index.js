@@ -15,6 +15,8 @@ const  ReviewController = require("./Review.controller");
 const  BookingController = require("./Booking.controller");
 const TestimonialController = require("./Testimonial.controller");
 const PopularCollegeController = require("./PopularCollege.controller");
+const  PopularCityController = require("./PopularCities.controller"); 
+
 module.exports = {
   CollegeController,
   ProgramController,
@@ -32,5 +34,6 @@ module.exports = {
   ReviewController,
   BookingController,
   TestimonialController,
-  PopularCollegeController
+  PopularCollegeController,
+  PopularCityController
 };
