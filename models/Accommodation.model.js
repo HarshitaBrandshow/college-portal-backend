@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const accommodationSchema = new Schema({
-
   sourceLink: { type: String, required: true },
   name: { type: String, required: true },
   type: { 
@@ -117,6 +116,8 @@ const accommodationSchema = new Schema({
     secondary: { type: String, required: true },
     postalCode: { type: String, required: true },
     streetNumber: { type: String, required: true },
+    latitude: { type: Number, required: true },  // Add latitude
+    longitude: { type: Number, required: true }, // Add longitude
     features: [{
       name: { type: String, required: true },
       types: { type: String, required: true },
@@ -140,6 +141,8 @@ const accommodationSchema = new Schema({
   destinationDistance: { type: Number },
   status: { type: Boolean, default: true },         
   deleteflag: { type: Boolean, default: false },
+}, {
+  timestamps: true  // Enable automatic `createdAt` and `updatedAt` timestamps
 });
 
 module.exports = mongoose.model('Accommodation', accommodationSchema);
