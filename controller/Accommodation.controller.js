@@ -1,171 +1,154 @@
 const { Accommodation } = require('../models');
 
-// Create a new Accommodation
+// Create Accommodation
 const createAccommodation = async (req, res) => {
   try {
-    const accommodation = new Accommodation(req.body);
-    const savedAccommodation = await accommodation.save();
-    res.status(201).json({
-      status: true,
-      data: savedAccommodation,
-      message: 'Accommodation created successfully.',
+    const newAccommodation = new Accommodation(req.body);
+    await newAccommodation.save();
+
+    return res.status(201).json({
+      msg: 'Accommodation created successfully.',
+      data: newAccommodation,
+      status: true
     });
   } catch (error) {
-    res.status(400).json({
-      status: false,
-      data: null,
-      message: error.message,
+    return res.status(400).json({
+      msg: 'Error creating accommodation.',
+      data: error.message,
+      status: false
     });
   }
 };
 
-// Get all Accommodations with Search and Filter Functionality
+// Smart Search and Filter
 const getAllAccommodations = async (req, res) => {
   try {
-    const { 
-      name, type, city, state, country, 
-      minPrice, maxPrice, minRating, maxRating 
-    } = req.query;
+    const { name, city, minPrice, maxPrice, type } = req.query;
 
-    // Initialize the filter object
-    const filter = {};
-    let search = false;
+    // Build the query object for MongoDB
+    let query = {};
 
-    // If any search parameters (name, type, city, state, country) are provided
-    if (name || type || city || state || country) {
-      search = true;
-
-      // Apply search filters (case-insensitive matching using regex)
-      if (name) filter.name = { $regex: name, $options: 'i' };
-      if (type) filter.type = { $regex: type, $options: 'i' };
-      if (city) filter['location.city'] = { $regex: city, $options: 'i' };
-      if (state) filter['location.state'] = { $regex: state, $options: 'i' };
-      if (country) filter['location.country'] = { $regex: country, $options: 'i' };
+    // Smart Search using $text for name and city
+    if (name || city) {
+      query = { $text: { $search: `${name || ''} ${city || ''}` } };
     }
 
-    // If filter parameters (price, rating) are provided
-    if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price.$gte = parseFloat(minPrice);
-      if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
+    // Filter by name using regex (for partial and fuzzy search)
+    if (name) {
+      query.name = { $regex: name, $options: 'i' }; // Case-insensitive search
     }
 
-    if (minRating || maxRating) {
-      filter.rating = {};
-      if (minRating) filter.rating.$gte = parseFloat(minRating);
-      if (maxRating) filter.rating.$lte = parseFloat(maxRating);
+    // Filter by type
+    if (type) {
+      query.type = { $regex: type, $options: 'i' }; // Case-insensitive search
     }
 
-    // Fetch the accommodations based on search or filter criteria
-    const accommodations = await Accommodation.find(filter);
-
-    // Return the result based on search or filter
-    if (search) {
-      // If it's a search request, return the search result only
-      res.status(200).json({
-        status: true,
-        data: accommodations,
-        message: accommodations.length
-          ? 'Search results retrieved successfully.'
-          : 'No accommodations found matching your search criteria.',
-      });
-    } else {
-      // If it's just a filter request, return the filtered result only
-      res.status(200).json({
-        status: true,
-        data: accommodations,
-        message: accommodations.length
-          ? 'Filtered accommodations retrieved successfully.'
-          : 'No accommodations found matching your filter criteria.',
-      });
+    // Filter by city
+    if (city) {
+      query['location.city'] = { $regex: city, $options: 'i' }; // Case-insensitive search
     }
+
+    // Price Range Filter (smart filter)
+    if (minPrice && maxPrice) {
+      query['pricing.minPrice'] = { $gte: minPrice };
+      query['pricing.maxPrice'] = { $lte: maxPrice };
+    } else if (minPrice) {
+      query['pricing.minPrice'] = { $gte: minPrice };
+    } else if (maxPrice) {
+      query['pricing.maxPrice'] = { $lte: maxPrice };
+    }
+
+    // Fetch accommodations with the query
+    const accommodations = await Accommodation.find(query);
+    
+    return res.status(200).json({
+      msg: 'Accommodations fetched successfully.',
+      data: accommodations,
+      status: true
+    });
   } catch (error) {
-    res.status(500).json({
-      status: false,
-      data: null,
-      message: error.message,
+    return res.status(400).json({
+      msg: 'Error fetching accommodations.',
+      data: error.message,
+      status: false
     });
   }
 };
 
-
-// Get a single Accommodation by ID
+// Get Single Accommodation by ID
 const getAccommodationById = async (req, res) => {
   try {
     const accommodation = await Accommodation.findById(req.params.id);
     if (!accommodation) {
       return res.status(404).json({
-        status: false,
+        msg: 'Accommodation not found.',
         data: null,
-        message: 'Accommodation not found.',
+        status: false
       });
     }
-    res.status(200).json({
-      status: true,
+
+    return res.status(200).json({
+      msg: 'Accommodation fetched successfully.',
       data: accommodation,
-      message: 'Accommodation retrieved successfully.',
+      status: true
     });
   } catch (error) {
-    res.status(500).json({
-      status: false,
-      data: null,
-      message: error.message,
+    return res.status(400).json({
+      msg: 'Error fetching accommodation.',
+      data: error.message,
+      status: false
     });
   }
 };
 
-// Update an Accommodation by ID
-const updateAccommodation = async (req, res) => {
+// Update Accommodation by ID
+const updateAccommodationById = async (req, res) => {
   try {
-    const updatedAccommodation = await Accommodation.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const updatedAccommodation = await Accommodation.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedAccommodation) {
       return res.status(404).json({
-        status: false,
+        msg: 'Accommodation not found.',
         data: null,
-        message: 'Accommodation not found.',
+        status: false
       });
     }
-    res.status(200).json({
-      status: true,
+
+    return res.status(200).json({
+      msg: 'Accommodation updated successfully.',
       data: updatedAccommodation,
-      message: 'Accommodation updated successfully.',
+      status: true
     });
   } catch (error) {
-    res.status(400).json({
-      status: false,
-      data: null,
-      message: error.message,
+    return res.status(400).json({
+      msg: 'Error updating accommodation.',
+      data: error.message,
+      status: false
     });
   }
 };
 
-// Delete an Accommodation by ID
-const deleteAccommodation = async (req, res) => {
+// Delete Accommodation by ID
+const deleteAccommodationById = async (req, res) => {
   try {
-    const deletedAccommodation = await Accommodation.findByIdAndDelete(
-      req.params.id
-    );
+    const deletedAccommodation = await Accommodation.findByIdAndDelete(req.params.id);
     if (!deletedAccommodation) {
       return res.status(404).json({
-        status: false,
+        msg: 'Accommodation not found.',
         data: null,
-        message: 'Accommodation not found.',
+        status: false
       });
     }
-    res.status(200).json({
-      status: true,
+
+    return res.status(200).json({
+      msg: 'Accommodation deleted successfully.',
       data: deletedAccommodation,
-      message: 'Accommodation deleted successfully.',
+      status: true
     });
   } catch (error) {
-    res.status(500).json({
-      status: false,
-      data: null,
-      message: error.message,
+    return res.status(400).json({
+      msg: 'Error deleting accommodation.',
+      data: error.message,
+      status: false
     });
   }
 };
@@ -174,6 +157,6 @@ module.exports = {
   createAccommodation,
   getAllAccommodations,
   getAccommodationById,
-  updateAccommodation,
-  deleteAccommodation
+  updateAccommodationById,
+  deleteAccommodationById
 };
