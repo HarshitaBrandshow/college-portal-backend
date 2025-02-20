@@ -138,7 +138,7 @@ const accommodationSchema = new Schema({
   reviewsCount: { type: Number },
   reviewsRating: { type: Number },
   destinationDistance: { type: Number },
-  status: { type: Boolean, default: true },         // Status (active or inactive)
+  status: { type: Boolean, default: true },         
   deleteflag: { type: Boolean, default: false },
 });
 
