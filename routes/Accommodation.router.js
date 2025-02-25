@@ -3,10 +3,10 @@ const router = express.Router();
 const{ AccommodationController }= require('../controller'); 
 
 // Routes
-router.post('/add-accommodation', AccommodationController.createAccommodation); // Ensure this method exists in the controller
-router.get('/all-accommodations', AccommodationController.getAllAccommodations); // Ensure this method exists
-router.get('/accommodations/:id',AccommodationController.getAccommodationById); // Ensure this method exists
-router.put('/accommodations/:id', AccommodationController.updateAccommodationById); // Ensure this method exists
-router.delete('/accommodations/:id',AccommodationController.deleteAccommodationById); // Ensure this method exists
+router.post('/add-accommodation', AccommodationController.createAccommodation); 
+router.get('/all-accommodations', AccommodationController.getAllAccommodations); 
+router.get('/accommodations/:id',AccommodationController.getAccommodationById); 
+router.put('/accommodations/:id', AccommodationController.updateAccommodationById); 
+router.delete('/accommodations/:id',AccommodationController.deleteAccommodationById);
 
 module.exports = router;

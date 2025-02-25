@@ -20,11 +20,10 @@ const createAccommodation = async (req, res) => {
   }
 };
 
-//  get All with Smart Search and Filter
-
+// get all accommodations
 const getAllAccommodations = async (req, res) => {
   try {
-    const { name, city, minPrice, maxPrice, type, city_img } = req.query;
+    const { name, city, minPrice, maxPrice, type, city_img, availableType } = req.query;
 
     // Build the query object for MongoDB
     let query = {};
@@ -52,6 +51,11 @@ const getAllAccommodations = async (req, res) => {
     // Filter by city_img (added new filter)
     if (city_img) {
       query['location.city_img'] = { $regex: city_img, $options: 'i' }; // Case-insensitive search
+    }
+
+    // Filter by availableType (new filter added)
+    if (availableType) {
+      query.availableType = { $regex: availableType, $options: 'i' }; // Case-insensitive search
     }
 
     // Price Range Filter (smart filter)

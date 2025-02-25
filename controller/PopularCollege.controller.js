@@ -3,12 +3,30 @@ const { PopularCollege } = require('../models');  // Assuming your model file is
 // CREATE - Add a new college
 const createPopularCollege = async (req, res) => {
     try {
-        const { img, ...otherFields } = req.body;  // Destructure img field and other fields
-        const newCollege = new PopularCollege({ ...otherFields, img: img || [] }); // Assign img array (default to empty array if not provided)
+        const { img, ranking, placement_details, scholarship_details, location, ...otherFields } = req.body;
+        
+        // Set default empty arrays or objects where necessary
+        const newCollege = new PopularCollege({
+            ...otherFields,
+            img: img || [],
+            ranking: ranking || 0, // Default to 0 if no ranking is provided
+            placement_details: placement_details || {},
+            scholarship_details: scholarship_details || "",
+            location: location || { latitude: 0, longitude: 0 }, // Default location if not provided
+        });
+
         const savedCollege = await newCollege.save();
-        res.status(201).json({ message: 'College added successfully', college: savedCollege });
+        res.status(201).json({
+            status: 'success',
+            message: 'College added successfully',
+            data: savedCollege
+        });
     } catch (error) {
-        res.status(400).json({ message: 'Error adding college', error: error.message });
+        res.status(400).json({
+            status: 'error',
+            message: 'Error adding college',
+            error: error.message
+        });
     }
 };
 
@@ -17,43 +35,75 @@ const getPopularColleges = async (req, res) => {
     try {
         const { search, filter, page = 1, limit = 10 } = req.query;
 
-        // Build the search query
+        // Initialize the query object
         let query = {};
 
+        // Build the search query for various fields
         if (search) {
             query = {
                 $or: [
-                    { name: { $regex: search, $options: 'i' } },
-                    { city: { $regex: search, $options: 'i' } },
-                    { state: { $regex: search, $options: 'i' } },
-                    { country: { $regex: search, $options: 'i' } },
-                    { type: { $regex: search, $options: 'i' } },
-                    { courses_offered: { $regex: search, $options: 'i' } },
-                    { affiliation: { $regex: search, $options: 'i' } },
+                    { name: { $regex: search, $options: 'i' } }, // Case-insensitive search for name
+                    { city: { $regex: search, $options: 'i' } }, // Case-insensitive search for city
+                    { state: { $regex: search, $options: 'i' } }, // Case-insensitive search for state
+                    { country: { $regex: search, $options: 'i' } }, // Case-insensitive search for country
+                    { college_type: { $regex: search, $options: 'i' } }, // Case-insensitive search for college_type
+                    { courses_offered: { $regex: search, $options: 'i' } }, // Case-insensitive search for courses offered
+                    { affiliation: { $regex: search, $options: 'i' } }, // Case-insensitive search for affiliation
+                    { description: { $regex: search, $options: 'i' } }, // Case-insensitive search for description
+                    { 'placement_details.highest_package': { $regex: search, $options: 'i' } }, // Searching inside placement details
+                    { 'placement_details.avg_package': { $regex: search, $options: 'i' } } // Searching inside placement details
                 ],
             };
         }
 
-        // Apply filters
+        // Apply dynamic filters
         if (filter) {
-            const filterObj = JSON.parse(filter); // Filters should be passed as a JSON object
-            query = { ...query, ...filterObj };
+            try {
+                const filterObj = JSON.parse(filter); // Parse filter JSON string from query params
+
+                // Handle special cases like numeric filters or Boolean filters
+                for (const key in filterObj) {
+                    if (filterObj[key] === 'true' || filterObj[key] === 'false') {
+                        filterObj[key] = filterObj[key] === 'true'; // Convert string 'true'/'false' to Boolean
+                    }
+
+                    // You can add more custom filter logic here if needed, for example for ranges, specific conditions etc.
+                }
+
+                query = { ...query, ...filterObj }; // Merge dynamic filters with the search query
+            } catch (err) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Invalid filter format',
+                    error: err.message
+                });
+            }
         }
 
-        // Paginate
+        // Pagination logic
         const skip = (page - 1) * limit;
+
+        // Fetch colleges based on the query
         const colleges = await PopularCollege.find(query).skip(skip).limit(limit);
+
+        // Get the total count of colleges matching the query for pagination
         const total = await PopularCollege.countDocuments(query);
 
+        // Return the result with pagination details
         res.status(200).json({
+            status: 'success',
             message: 'Colleges retrieved successfully',
-            colleges,
+            data: colleges,
             total,
             page,
-            totalPages: Math.ceil(total / limit),
+            totalPages: Math.ceil(total / limit)
         });
     } catch (error) {
-        res.status(400).json({ message: 'Error retrieving colleges', error: error.message });
+        res.status(400).json({
+            status: 'error',
+            message: 'Error retrieving colleges',
+            error: error.message
+        });
     }
 };
 
@@ -62,11 +112,22 @@ const getPopularCollegeById = async (req, res) => {
     try {
         const college = await PopularCollege.findById(req.params.id);
         if (!college) {
-            return res.status(404).json({ message: 'College not found' });
+            return res.status(404).json({
+                status: 'error',
+                message: 'College not found'
+            });
         }
-        res.status(200).json({ college });
+        res.status(200).json({
+            status: 'success',
+            message: 'College retrieved successfully',
+            data: college
+        });
     } catch (error) {
-        res.status(400).json({ message: 'Error retrieving college', error: error.message });
+        res.status(400).json({
+            status: 'error',
+            message: 'Error retrieving college',
+            error: error.message
+        });
     }
 };
 
@@ -80,11 +141,22 @@ const updatePopularCollege = async (req, res) => {
             { new: true }
         );
         if (!updatedCollege) {
-            return res.status(404).json({ message: 'College not found' });
+            return res.status(404).json({
+                status: 'error',
+                message: 'College not found'
+            });
         }
-        res.status(200).json({ message: 'College updated successfully', updatedCollege });
+        res.status(200).json({
+            status: 'success',
+            message: 'College updated successfully',
+            data: updatedCollege
+        });
     } catch (error) {
-        res.status(400).json({ message: 'Error updating college', error: error.message });
+        res.status(400).json({
+            status: 'error',
+            message: 'Error updating college',
+            error: error.message
+        });
     }
 };
 
@@ -93,11 +165,21 @@ const deletePopularCollege = async (req, res) => {
     try {
         const deletedCollege = await PopularCollege.findByIdAndDelete(req.params.id);
         if (!deletedCollege) {
-            return res.status(404).json({ message: 'College not found' });
+            return res.status(404).json({
+                status: 'error',
+                message: 'College not found'
+            });
         }
-        res.status(200).json({ message: 'College deleted successfully' });
+        res.status(200).json({
+            status: 'success',
+            message: 'College deleted successfully'
+        });
     } catch (error) {
-        res.status(400).json({ message: 'Error deleting college', error: error.message });
+        res.status(400).json({
+            status: 'error',
+            message: 'Error deleting college',
+            error: error.message
+        });
     }
 };
 
@@ -107,4 +189,4 @@ module.exports = {
     getPopularCollegeById,
     updatePopularCollege,
     deletePopularCollege
-}
+};
