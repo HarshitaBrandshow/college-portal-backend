@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const accommodationSchema = new Schema({
-  sourceLink: { type: String, required: true },
+  sourceLink: { type: String},
   name: { type: String, required: true },
   type: { 
     type: String, 
@@ -20,7 +20,7 @@ const accommodationSchema = new Schema({
     maxPrice: { type: Number, required: true },
     minPrice: { type: Number, required: true },
     minDeposit: { type: Number, required: true },
-    refundable: { type: Boolean, required: true },
+    refundable: { type: Boolean,  },
     maxAvailablePrice: { type: Number, required: true },
   },
   amenities: { type: [String], required: true },  
