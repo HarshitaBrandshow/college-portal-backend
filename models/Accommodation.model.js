@@ -120,8 +120,8 @@ const accommodationSchema = new Schema({
     longitude: { type: Number, required: true }, // Add longitude
     city_img: [{ type: String }],  // Added city image field here
     features: [{
-      name: { type: String, required: true },
-      types: { type: String, required: true },
+      name: { type: String,},
+      types: { type: String,},
       value: [{ type: String }],
     }],
   },
