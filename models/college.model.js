@@ -2,9 +2,21 @@ const mongoose = require("mongoose");
 
 const collegeSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true }, // College name
+    name: { type: String, required: true },
+    address: { 
+      type: String 
+  },  
     city: { type: String }, // City
     state: { type: String }, // State
+    description: {
+      type: String, 
+      trim: true 
+  },
+
+  courses_offered: { 
+    type: [String], 
+    required: true 
+}, // List of courses offered by the college
     established_year: { type: Number }, // Year established
     affiliated_university: { type: String }, // Affiliated university name
     college_type: {
