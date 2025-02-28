@@ -12,7 +12,7 @@ const Advertisement = require("./Advertisement.model");
 const ApiKey = require("./ApiKey.model");
 const Hostel = require("./Hostel.model");
 const Review = require("./Review.model");
-const Booking = require("./Booking.model");
+const AccommodationBook = require("./AccommodationBook.model");
 const Testimonial = require("./Testimonial.model");
 const PopularCollege = require("./PopularCollege.model");
 const PopularCity = require("./PopularCities.model");
@@ -33,7 +33,7 @@ module.exports = {
   ApiKey,
   Hostel,
   Review,
-  Booking,
+  AccommodationBook,
   Testimonial,
   PopularCollege,
   PopularCity,

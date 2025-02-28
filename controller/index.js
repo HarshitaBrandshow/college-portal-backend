@@ -12,7 +12,7 @@ const AdvertisementController = require("./Advertisement.controller");
 const  ApiKeyController = require("./ApiKey.controller");
 const  HostelController = require("./Hostel.controller");
 const  ReviewController = require("./Review.controller");
-const  BookingController = require("./Booking.controller");
+const  AccommodationBookController = require("./AccommodationBook.controller");
 const TestimonialController = require("./Testimonial.controller");
 const PopularCollegeController = require("./PopularCollege.controller");
 const  PopularCityController = require("./PopularCities.controller"); 
@@ -33,7 +33,7 @@ module.exports = {
   ApiKeyController,
   HostelController,
   ReviewController,
-  BookingController,
+  AccommodationBookController,
   TestimonialController,
   PopularCollegeController,
   PopularCityController,

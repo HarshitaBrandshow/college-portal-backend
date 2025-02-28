@@ -13,17 +13,14 @@ const collegeSchema = new mongoose.Schema(
       trim: true 
   },
 
-  courses_offered: { 
-    type: [String], 
-    required: true 
-}, // List of courses offered by the college
+  courses_offered: { type: [String], required: true }, // List of courses offered by the college
     established_year: { type: Number }, // Year established
     affiliated_university: { type: String }, // Affiliated university name
     college_type: {
       type: String,
       enum: ["Public", "Private", "Government"],
       default: "Public",
-    }, // College type
+    }, 
     ranking: { type: Number, default: 0 }, // Ranking
     accreditation: { type: String }, // Accreditation details
     placement_details: {
