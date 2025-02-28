@@ -16,6 +16,7 @@ const Booking = require("./Booking.model");
 const Testimonial = require("./Testimonial.model");
 const PopularCollege = require("./PopularCollege.model");
 const PopularCity = require("./PopularCities.model");
+const Enquiry = require("./EnquireNow.model");
 
 module.exports = {
   College,
@@ -35,6 +36,7 @@ module.exports = {
   Booking,
   Testimonial,
   PopularCollege,
-  PopularCity
+  PopularCity,
+  Enquiry,
 
 }
