@@ -1,341 +1,122 @@
-const { College } = require("../models");
+const  { College } = require('../models'); // Import the College model
+const  { PopularCollege } = require('../models'); // Import the PopularCollege model
 
-// Create College
-const createCollege = async (req, res) => {
+// 1. Add a new College (with isPopular logic)
+async function addCollege(req, res) {
+  const collegeData = req.body;
+
   try {
-    const {
-      name,
-      address,
-      city,
-      state,
-      description,
-      courses_offered, // Extract courses_offered from the body
-      established_year,
-      affiliated_university,
-      college_type,
-      ranking,
-      accreditation,
-      placement_details,
-      hostel_availability,
-      scholarship_details,
-      phone,
-      email,
-      location,
-      images,
-      datasheet_url,
-      website_url,
-    } = req.body;
+    // Create a new College document
+    const newCollege = new College(collegeData);
+    await newCollege.save(); // Save to College API
 
-    // Ensure courses_offered is provided
-    if (!courses_offered || courses_offered.length === 0) {
-      return res.status(400).json({
-        status: false,
-        message: "Courses offered must be provided.",
-        data: false,
-      });
+    // If the college is marked as popular, also add it to the Popular College collection
+    if (newCollege.isPopular) {
+      await addToPopularCollege(newCollege); // Save to PopularCollege API if popular
     }
 
-    // Create a new College instance
-    const newCollege = new College({
-      name,
-      address,
-      city,
-      state,
-      description,
-      courses_offered, // Pass the courses_offered here
-      established_year,
-      affiliated_university,
-      college_type,
-      ranking,
-      accreditation,
-      placement_details,
-      hostel_availability,
-      scholarship_details,
-      phone,
-      email,
-      location,
-      images,
-      datasheet_url,
-      website_url,
-    });
-
-    // Save the college document to the database
-    const savedCollege = await newCollege.save();
-
-    return res.status(201).json({
-      status: true,
-      message: "College created successfully.",
-      data: savedCollege,
-    });
-  } catch (error) {
-    console.error("Error creating college:", error);
-    return res.status(500).json({
-      status: false,
-      message: "Internal server error.",
-      data: false,
-    });
+    res.status(200).json({ message: 'College added successfully!' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error adding college', error: err });
   }
-};
+}
 
+// Helper function to add to Popular College API
+async function addToPopularCollege(college) {
+  const newPopularCollege = new PopularCollege({
+    name: college.name,
+    city: college.city,
+    state: college.state,
+    country: "India", // Modify as needed
+    college_type: college.college_type,
+    courses_offered: college.courses_offered,
+    ranking: college.ranking,
+    website: college.website_url,
+    established_year: college.established_year,
+    affiliation: college.affiliated_university,
+    address: college.address,
+    contact_number: college.phone,
+    email: college.email,
+    img: college.images,
+    placement_details: college.placement_details,
+    hostel_availability: college.hostel_availability,
+    scholarship_details: college.scholarship_details,
+    location: college.location,
+    status: college.status,
+    description: college.description,
+  });
 
+  await newPopularCollege.save(); // Save to Popular College API
+}
 
-const getAllColleges = async (req, res) => {
+// 2. Update College (with isPopular logic)
+async function updateCollege(req, res) {
+  const collegeId = req.params.id;
+  const updateData = req.body;
+
   try {
-    const { search = "", city, state, phone, email, affiliated_university, accreditation, scholarship_details, website_url } = req.query;
+    const updatedCollege = await College.findByIdAndUpdate(collegeId, updateData, { new: true });
 
-    const filter = {};  // Initialize filter object
-    let result = [];
-
-    // Fetch all colleges first
-    result = await College.find(); 
-
-    // If a search term is provided, filter results across multiple fields
-    if (search) {
-      const searchRegex = new RegExp(search, "i");
-      result = result.filter(college => {
-        return (
-          new RegExp(searchRegex).test(college.name) ||
-          new RegExp(searchRegex).test(college.city) ||
-          new RegExp(searchRegex).test(college.state) ||
-          new RegExp(searchRegex).test(college.phone) ||
-          new RegExp(searchRegex).test(college.email) ||
-          new RegExp(searchRegex).test(college.affiliated_university) ||
-          new RegExp(searchRegex).test(college.accreditation) ||
-          new RegExp(searchRegex).test(college.scholarship_details) ||
-          new RegExp(searchRegex).test(college.website_url)
-        );
-      });
+    // If the college is marked as popular after the update, add it to the Popular College collection
+    if (updatedCollege.isPopular) {
+      await addToPopularCollege(updatedCollege); // Save to PopularCollege API if popular
     }
 
-    // Apply filters if provided
-    if (city) filter.city = { $regex: new RegExp(city, "i") };
-    if (state) filter.state = { $regex: new RegExp(state, "i") };
-    if (phone) filter.phone = { $regex: new RegExp(phone, "i") };
-    if (email) filter.email = { $regex: new RegExp(email, "i") };
-    if (affiliated_university) filter.affiliated_university = { $regex: new RegExp(affiliated_university, "i") };
-    if (accreditation) filter.accreditation = { $regex: new RegExp(accreditation, "i") };
-    if (scholarship_details) filter.scholarship_details = { $regex: new RegExp(scholarship_details, "i") };
-    if (website_url) filter.website_url = { $regex: new RegExp(website_url, "i") };
-
-    // If filters are applied, filter the result further
-    if (Object.keys(filter).length > 0) {
-      result = result.filter(college => {
-        return Object.keys(filter).every(key => {
-          return new RegExp(filter[key].$regex, "i").test(college[key]);
-        });
-      });
-    }
-
-    return res.status(200).json({
-      status: true,
-      message: "Colleges retrieved successfully.",
-      data: result
-    });
-
-  } catch (error) {
-    console.error("Error fetching colleges:", error);
-    return res.status(500).json({
-      status: false,
-      message: "Failed to retrieve colleges.",
-      data: false,
-    });
+    res.status(200).json({ message: 'College updated successfully!', updatedCollege });
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating college', error: err });
   }
-};
+}
 
-
-
-// Update College
-const updateCollege = async (req, res) => {
+// 3. Get All Colleges
+async function getAllColleges(req, res) {
   try {
-    const { id } = req.params; // College ID to update
-    const updates = req.body;
-
-    if (!id) {
-      return res.status(400).json({
-        status: false,
-        message: "College ID is required.",
-        data: false,
-      });
-    }
-
-    // Validate data types for specific fields
-    if (updates.established_year && isNaN(Number(updates.established_year))) {
-      return res.status(400).json({
-        status: false,
-        message: "Established year must be a number.",
-        data: false,
-      });
-    }
-
-    if (updates.ranking && isNaN(Number(updates.ranking))) {
-      return res.status(400).json({
-        status: false,
-        message: "Ranking must be a number.",
-        data: false,
-      });
-    }
-
-    if (updates.location) {
-      const { latitude, longitude } = updates.location;
-      if (latitude && typeof latitude !== "number") {
-        return res.status(400).json({
-          status: false,
-          message: "Latitude must be a number.",
-          data: false,
-        });
-      }
-      if (longitude && typeof longitude !== "number") {
-        return res.status(400).json({
-          status: false,
-          message: "Longitude must be a number.",
-          data: false,
-        });
-      }
-    }
-
-    // Find the college to update
-    const existingCollege = await College.findById(id);
-    if (!existingCollege) {
-      return res.status(404).json({
-        status: false,
-        message: "College not found.",
-        data: false,
-      });
-    }
-
-    // Update fields
-    const updatedCollege = await College.findByIdAndUpdate(id, updates, {
-      new: true,
-      runValidators: true,
-    });
-
-    return res.status(200).json({
-      status: true,
-      message: "College updated successfully.",
-      data: updatedCollege,
-    });
-  } catch (error) {
-    console.error("Error updating college:", error);
-    if (error.name === "ValidationError") {
-      return res.status(400).json({
-        status: false,
-        message: "Validation failed.",
-        data: error.message,
-      });
-    }
-    if (error.name === "CastError") {
-      return res.status(400).json({
-        status: false,
-        message: "Invalid College ID format.",
-        data: false,
-      });
-    }
-    return res.status(500).json({
-      status: false,
-      message: "Internal server error.",
-      data: false,
-    });
+    const colleges = await College.find();
+    res.status(200).json(colleges);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching colleges', error: err });
   }
-};
+}
 
-// Delete College (soft delete)
-const deleteCollege = async (req, res) => {
+// 4. Get All Popular Colleges
+async function getAllPopularColleges(req, res) {
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({
-        status: false,
-        message: "College ID is required.",
-        data: false,
-      });
-    }
-
-    const college = await College.findById(id);
-    if (!college) {
-      return res.status(404).json({
-        status: false,
-        message: "College not found.",
-        data: false,
-      });
-    }
-
-    // Soft delete the college
-    college.deleteflag = true;
-    college.status = false;
-    await college.save();
-
-    return res.status(200).json({
-      status: true,
-      message: "College deleted successfully.",
-      data: false,
-    });
-  } catch (error) {
-    console.error("Error deleting college:", error);
-    if (error.name === "CastError") {
-      return res.status(400).json({
-        status: false,
-        message: "Invalid College ID format.",
-        data: false,
-      });
-    }
-    return res.status(500).json({
-      status: false,
-      message: "Internal server error.",
-      data: false,
-    });
+    const popularColleges = await PopularCollege.find();
+    res.status(200).json(popularColleges);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching popular colleges', error: err });
   }
-};
+}
 
-// Get College by ID
-const getCollegeById = async (req, res) => {
+// 5. Delete College
+async function deleteCollege(req, res) {
+  const collegeId = req.params.id;
+
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({
-        status: false,
-        message: "College ID is required.",
-        data: false,
-      });
-    }
-
-    const college = await College.findById(id);
-
-    if (!college) {
-      return res.status(404).json({
-        status: false,
-        message: "College not found.",
-        data: false,
-      });
-    }
-
-    return res.status(200).json({
-      status: true,
-      message: "College retrieved successfully.",
-      data: college,
-    });
-  } catch (error) {
-    console.error("Error fetching college by ID:", error);
-    if (error.name === "CastError") {
-      return res.status(400).json({
-        status: false,
-        message: "Invalid College ID format.",
-        data: false,
-      });
-    }
-    return res.status(500).json({
-      status: false,
-      message: "Internal server error.",
-      data: false,
-    });
+    const deletedCollege = await College.findByIdAndDelete(collegeId);
+    res.status(200).json({ message: 'College deleted successfully!', deletedCollege });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting college', error: err });
   }
-};
+}
+
+// 6. Delete Popular College
+async function deletePopularCollege(req, res) {
+  const popularCollegeId = req.params.id;
+
+  try {
+    const deletedPopularCollege = await PopularCollege.findByIdAndDelete(popularCollegeId);
+    res.status(200).json({ message: 'Popular College deleted successfully!', deletedPopularCollege });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting popular college', error: err });
+  }
+}
 
 module.exports = {
-  createCollege,
+  addCollege,
   updateCollege,
-  deleteCollege,
-  getCollegeById,
   getAllColleges,
+  getAllPopularColleges,
+  deleteCollege,
+  deletePopularCollege,
 };
