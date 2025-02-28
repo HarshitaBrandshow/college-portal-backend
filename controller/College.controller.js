@@ -5,10 +5,11 @@ const createCollege = async (req, res) => {
   try {
     const {
       name,
+      address,
       city,
       state,
-      phone,
-      email,
+      description,
+      courses_offered, // Extract courses_offered from the body
       established_year,
       affiliated_university,
       college_type,
@@ -17,46 +18,19 @@ const createCollege = async (req, res) => {
       placement_details,
       hostel_availability,
       scholarship_details,
+      phone,
+      email,
       location,
       images,
       datasheet_url,
       website_url,
     } = req.body;
 
-    // Validate required fields
-    if (!name || !phone || !email) {
+    // Ensure courses_offered is provided
+    if (!courses_offered || courses_offered.length === 0) {
       return res.status(400).json({
         status: false,
-        message: "Name, Phone, and Email are required fields.",
-        data: false,
-      });
-    }
-
-    // Validate data types
-    if (established_year && isNaN(Number(established_year))) {
-      return res.status(400).json({
-        status: false,
-        message: "Established year must be a number.",
-        data: false,
-      });
-    }
-
-    if (ranking && isNaN(Number(ranking))) {
-      return res.status(400).json({
-        status: false,
-        message: "Ranking must be a number.",
-        data: false,
-      });
-    }
-
-    // Avoid duplicate email or phone
-    const existingCollege = await College.findOne({
-      $or: [{ email }, { phone }],
-    });
-    if (existingCollege) {
-      return res.status(409).json({
-        status: false,
-        message: "A college with the same email or phone already exists.",
+        message: "Courses offered must be provided.",
         data: false,
       });
     }
@@ -64,10 +38,11 @@ const createCollege = async (req, res) => {
     // Create a new College instance
     const newCollege = new College({
       name,
+      address,
       city,
       state,
-      phone,
-      email,
+      description,
+      courses_offered, // Pass the courses_offered here
       established_year,
       affiliated_university,
       college_type,
@@ -76,13 +51,15 @@ const createCollege = async (req, res) => {
       placement_details,
       hostel_availability,
       scholarship_details,
+      phone,
+      email,
       location,
       images,
       datasheet_url,
       website_url,
     });
 
-    // Save to database
+    // Save the college document to the database
     const savedCollege = await newCollege.save();
 
     return res.status(201).json({
@@ -92,20 +69,6 @@ const createCollege = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating college:", error);
-    if (error.name === "ValidationError") {
-      return res.status(400).json({
-        status: false,
-        message: "Validation failed.",
-        data: error.message,
-      });
-    }
-    if (error.code === 11000) {
-      return res.status(409).json({
-        status: false,
-        message: "Duplicate entry detected.",
-        data: error.keyValue,
-      });
-    }
     return res.status(500).json({
       status: false,
       message: "Internal server error.",
@@ -113,6 +76,8 @@ const createCollege = async (req, res) => {
     });
   }
 };
+
+
 
 const getAllColleges = async (req, res) => {
   try {
