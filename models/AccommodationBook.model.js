@@ -27,11 +27,27 @@ const accommodationBookingSchema = new mongoose.Schema({
   moveIn: { type: Date, required: true },
   moveOut: { type: Date, required: true },
 
+    // Guarantor Details
+    guarantorDetails: {
+      relation: { type: String, required: true }, // Relation to the person booking (e.g., parent, guardian, etc.)
+      guarantorTitle: { type: String, required: true }, // Title (e.g., Mr., Mrs., etc.)
+      guarantorName: { type: String, required: true }, // Full name of the guarantor
+      guarantorBirthDate: { type: Date, required: true }, // Birth date of the guarantor
+      guarantorEmail: { type: String, required: true }, // Email of the guarantor
+      guarantorCode: { type: String, required: true }, // Unique code for the guarantor
+      guarantorMobiles: { type: [String], required: true }, // Array of phone numbers (mobile) of the guarantor
+      guarantorAddress: { type: String, required: true }, // Address of the guarantor
+      guarantorCountry: { type: String, required: true }, // Country of the guarantor
+      guarantorCity: { type: String, required: true }, // City of the guarantor
+      guarantorZipcode: { type: String, required: true }, // Zipcode of the guarantor's address
+    },
+
   // Booking Status
   status: { type: Boolean, default: true }, // True if active, False if canceled or completed
 
   // Soft Delete Flag
   deleteFlag: { type: Boolean, default: false },
+
 
 }, { timestamps: true });
 

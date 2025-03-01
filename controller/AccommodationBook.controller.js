@@ -1,8 +1,9 @@
-const  { AccommodationBook } = require('../models'); // Adjust path accordingly
+const { AccommodationBook } = require('../models'); // Adjust path accordingly
 
 // Create a new Accommodation Booking
 const createBooking = async (req, res) => {
   try {
+    // Ensure that the request body contains the necessary guarantor details as well
     const newBooking = new AccommodationBook(req.body);
     await newBooking.save();
     return res.status(201).json({
@@ -42,7 +43,11 @@ const getAllBookings = async (req, res) => {
 // Get a single Accommodation Booking by ID
 const getBookingById = async (req, res) => {
   try {
-    const booking = await AccommodationBook.findOne({ _id: req.params.id, deleteFlag: false });
+    const booking = await AccommodationBook.findOne({
+      _id: req.params.id,
+      deleteFlag: false,
+    }).populate('accommodationId enquiryId'); // Populate references to get full details of accommodation and enquiry
+
     if (!booking) {
       return res.status(404).json({
         status: 'error',
