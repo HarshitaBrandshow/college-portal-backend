@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const accommodationBookingSchema = new mongoose.Schema({
   // Reference to Accommodation model
-  accommodationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Accommodation', required: true },
+  accommodationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Accommodation' },
 
   // Reference to Enquiry model
-  enquiryId: { type: mongoose.Schema.Types.ObjectId, ref: 'EnquiryNow', required: true },
+  enquiryId: { type: mongoose.Schema.Types.ObjectId, ref: 'EnquiryNow'  },
 
   // Personal Information
   dateOfBirth: { type: Date, required: true },
