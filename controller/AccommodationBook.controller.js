@@ -1,10 +1,10 @@
-const { AccommodationBook } = require('../models'); // Adjust path accordingly
+const { AccommodationBooking } = require('../models'); // Adjust path accordingly
 
 // Create a new Accommodation Booking
 const createBooking = async (req, res) => {
   try {
-    // Ensure that the request body contains the necessary guarantor details as well
-    const newBooking = new AccommodationBook(req.body);
+    // Ensure that the request body contains the necessary details
+    const newBooking = new AccommodationBooking(req.body);
     await newBooking.save();
     return res.status(201).json({
       status: 'success',
@@ -24,7 +24,7 @@ const createBooking = async (req, res) => {
 // Get all Accommodation Bookings
 const getAllBookings = async (req, res) => {
   try {
-    const bookings = await AccommodationBook.find({ deleteFlag: false });
+    const bookings = await AccommodationBooking.find({ deleteFlag: false });
     return res.status(200).json({
       status: 'success',
       message: 'Accommodation bookings fetched successfully!',
@@ -43,7 +43,7 @@ const getAllBookings = async (req, res) => {
 // Get a single Accommodation Booking by ID
 const getBookingById = async (req, res) => {
   try {
-    const booking = await AccommodationBook.findOne({
+    const booking = await AccommodationBooking.findOne({
       _id: req.params.id,
       deleteFlag: false,
     }).populate('accommodationId enquiryId'); // Populate references to get full details of accommodation and enquiry
@@ -72,7 +72,7 @@ const getBookingById = async (req, res) => {
 // Update an Accommodation Booking
 const updateBooking = async (req, res) => {
   try {
-    const updatedBooking = await AccommodationBook.findByIdAndUpdate(
+    const updatedBooking = await AccommodationBooking.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
@@ -103,7 +103,7 @@ const updateBooking = async (req, res) => {
 // Soft delete an Accommodation Booking (set deleteFlag to true)
 const deleteBooking = async (req, res) => {
   try {
-    const deletedBooking = await AccommodationBook.findByIdAndUpdate(
+    const deletedBooking = await AccommodationBooking.findByIdAndUpdate(
       req.params.id,
       { deleteFlag: true },
       { new: true }
