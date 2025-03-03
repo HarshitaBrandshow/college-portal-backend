@@ -16,6 +16,7 @@ const  AccommodationBookController = require("./AccommodationBook.controller");
 const TestimonialController = require("./Testimonial.controller");
 const  PopularCityController = require("./PopularCities.controller"); 
 const EnquireNowController = require("./EnquireNow.controller");
+const FaqController = require("./Faq.controller");
 
 module.exports = {
   CollegeController,
@@ -35,5 +36,6 @@ module.exports = {
   AccommodationBookController,
   TestimonialController,
   PopularCityController,
-  EnquireNowController
+  EnquireNowController,
+  FaqController
 };

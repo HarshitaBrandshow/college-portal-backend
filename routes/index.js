@@ -16,6 +16,7 @@ const AccommodationBookRouter = require("./AccommodationBook.router");
 const TestimonialRouter = require("./Testimonial.router");
 const PopularCityRouter = require("./PopularCities.router");
 const EnquireNowRouter = require("./EnquireNow.router");
+const FaqRouter = require("./Faq.router");
 
 module.exports = {
   CollegeRouter,
@@ -36,4 +37,5 @@ module.exports = {
   TestimonialRouter,
   PopularCityRouter,
   EnquireNowRouter,
+  FaqRouter
 };
