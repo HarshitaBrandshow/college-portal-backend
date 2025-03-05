@@ -15,7 +15,7 @@ app.use(express.json()); // To parse JSON request bodies
 // Import Routers
 const { CollegeRouter, ProgramRouter, AccommodationRouter, StreamRouter, AdminRouter, UserRouter, AffiliationRouter, 
   DepartmentsRouter, SearchRouter,EventRouter , AdvertisementRouter , ApiRouter, HostelRouter,  ReviewRouter
-   ,AccommodationBookRouter, TestimonialRouter  , PopularCityRouter, 
+   ,AccommodationBookRouter, TestimonialRouter  ,
   EnquireNowRouter,
   FaqRouter, } = require("./routes"); 
 
@@ -40,7 +40,6 @@ app.use("/api/hostel", HostelRouter);
 app.use("/api/review", ReviewRouter);
 app.use("/api/accommodationBook", AccommodationBookRouter);
 app.use("/api/testimonial", TestimonialRouter);
-app.use("/api/popularCity", PopularCityRouter);
 app.use("/api/enquireNow", EnquireNowRouter);
 app.use("/api/faq", FaqRouter);
 

@@ -1,172 +1,106 @@
-const { Accommodation } = require('../models');
+const  {Accommodation } = require('../models');
+const  { PopularCitiesAccommodation } = require('../models');
 
-// Create Accommodation
+// Create a new accommodation
 const createAccommodation = async (req, res) => {
   try {
-    const newAccommodation = new Accommodation(req.body);
+    const accommodationData = req.body;
+    
+    // First, create the accommodation in the Accommodation collection
+    const newAccommodation = new Accommodation(accommodationData);
     await newAccommodation.save();
 
-    return res.status(201).json({
-      msg: 'Accommodation created successfully.',
-      data: newAccommodation,
-      status: true
-    });
+    // If 'isCityPopular' is true, create the accommodation in the PopularCitiesAccommodation collection as well
+    if (accommodationData.isCityPopular) {
+      const newPopularCityAccommodation = new PopularCitiesAccommodation(accommodationData);
+      await newPopularCityAccommodation.save();
+    }
+
+    res.status(201).json({ message: 'Accommodation created successfully', accommodation: newAccommodation });
   } catch (error) {
-    return res.status(400).json({
-      msg: 'Error creating accommodation.',
-      data: error.message,
-      status: false
-    });
+    console.error(error);
+    res.status(500).json({ message: 'Error creating accommodation', error });
   }
 };
 
-// get all accommodations
+// Get all accommodations (from the Accommodation collection)
 const getAllAccommodations = async (req, res) => {
   try {
-    const { name, city, minPrice, maxPrice, type, city_img, availableType } = req.query;
-
-    // Build the query object for MongoDB
-    let query = {};
-
-    // Smart Search using $text for name and city
-    if (name || city) {
-      query = { $text: { $search: `${name || ''} ${city || ''}` } };
-    }
-
-    // Filter by name using regex (for partial and fuzzy search)
-    if (name) {
-      query.name = { $regex: name, $options: 'i' }; // Case-insensitive search
-    }
-
-    // Filter by type
-    if (type) {
-      query.type = { $regex: type, $options: 'i' }; // Case-insensitive search
-    }
-
-    // Filter by city
-    if (city) {
-      query['location.city'] = { $regex: city, $options: 'i' }; // Case-insensitive search
-    }
-
-    // Filter by city_img (added new filter)
-    if (city_img) {
-      query['location.city_img'] = { $regex: city_img, $options: 'i' }; // Case-insensitive search
-    }
-
-    // Filter by availableType (new filter added)
-    if (availableType) {
-      query.availableType = { $regex: availableType, $options: 'i' }; // Case-insensitive search
-    }
-
-    // Price Range Filter (smart filter)
-    if (minPrice && maxPrice) {
-      query['pricing.minPrice'] = { $gte: minPrice };
-      query['pricing.maxPrice'] = { $lte: maxPrice };
-    } else if (minPrice) {
-      query['pricing.minPrice'] = { $gte: minPrice };
-    } else if (maxPrice) {
-      query['pricing.maxPrice'] = { $lte: maxPrice };
-    }
-
-    // Fetch accommodations with the query
-    const accommodations = await Accommodation.find(query);
-    
-    return res.status(200).json({
-      msg: 'Accommodations fetched successfully.',
-      data: accommodations,
-      status: true
-    });
+    const accommodations = await Accommodation.find();
+    res.status(200).json({ accommodations });
   } catch (error) {
-    return res.status(400).json({
-      msg: 'Error fetching accommodations.',
-      data: error.message,
-      status: false
-    });
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching accommodations', error });
   }
 };
 
-// Get Single Accommodation by ID
-const getAccommodationById = async (req, res) => {
+// Get all popular city accommodations (from the PopularCitiesAccommodation collection)
+const getAllPopularCitiesAccommodations = async (req, res) => {
   try {
-    const accommodation = await Accommodation.findById(req.params.id);
-    if (!accommodation) {
-      return res.status(404).json({
-        msg: 'Accommodation not found.',
-        data: null,
-        status: false
-      });
-    }
-
-    return res.status(200).json({
-      msg: 'Accommodation fetched successfully.',
-      data: accommodation,
-      status: true
-    });
+    const popularCitiesAccommodations = await PopularCitiesAccommodation.find();
+    res.status(200).json({ popularCitiesAccommodations });
   } catch (error) {
-    return res.status(400).json({
-      msg: 'Error fetching accommodation.',
-      data: error.message,
-      status: false
-    });
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching popular city accommodations', error });
   }
 };
 
-// Update Accommodation by ID
-const updateAccommodationById = async (req, res) => {
+// Update an accommodation (check if isCityPopular is updated, and update accordingly)
+const updateAccommodation = async (req, res) => {
   try {
-    const updatedAccommodation = await Accommodation.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const accommodationId = req.params.id;
+    const updatedData = req.body;
+
+    const updatedAccommodation = await Accommodation.findByIdAndUpdate(accommodationId, updatedData, { new: true });
+
     if (!updatedAccommodation) {
-      return res.status(404).json({
-        msg: 'Accommodation not found.',
-        data: null,
-        status: false
-      });
+      return res.status(404).json({ message: 'Accommodation not found' });
     }
 
-    return res.status(200).json({
-      msg: 'Accommodation updated successfully.',
-      data: updatedAccommodation,
-      status: true
-    });
+    // If 'isCityPopular' has changed to true, add to PopularCitiesAccommodation
+    if (updatedData.isCityPopular && !updatedAccommodation.isCityPopular) {
+      const newPopularCityAccommodation = new PopularCitiesAccommodation(updatedAccommodation.toObject());
+      await newPopularCityAccommodation.save();
+    }
+
+    // If 'isCityPopular' has changed to false, remove from PopularCitiesAccommodation
+    if (!updatedData.isCityPopular && updatedAccommodation.isCityPopular) {
+      await PopularCitiesAccommodation.findByIdAndDelete(updatedAccommodation._id);
+    }
+
+    res.status(200).json({ message: 'Accommodation updated successfully', accommodation: updatedAccommodation });
   } catch (error) {
-    return res.status(400).json({
-      msg: 'Error updating accommodation.',
-      data: error.message,
-      status: false
-    });
+    console.error(error);
+    res.status(500).json({ message: 'Error updating accommodation', error });
   }
 };
 
-// Delete Accommodation by ID
-const deleteAccommodationById = async (req, res) => {
+// Delete an accommodation (delete from both collections if isCityPopular is true)
+const deleteAccommodation = async (req, res) => {
   try {
-    const deletedAccommodation = await Accommodation.findByIdAndDelete(req.params.id);
-    if (!deletedAccommodation) {
-      return res.status(404).json({
-        msg: 'Accommodation not found.',
-        data: null,
-        status: false
-      });
+    const accommodationId = req.params.id;
+    const accommodation = await Accommodation.findByIdAndDelete(accommodationId);
+
+    if (!accommodation) {
+      return res.status(404).json({ message: 'Accommodation not found' });
     }
 
-    return res.status(200).json({
-      msg: 'Accommodation deleted successfully.',
-      data: deletedAccommodation,
-      status: true
-    });
+    // If isCityPopular is true, also delete from PopularCitiesAccommodation
+    if (accommodation.isCityPopular) {
+      await PopularCitiesAccommodation.findByIdAndDelete(accommodation._id);
+    }
+
+    res.status(200).json({ message: 'Accommodation deleted successfully' });
   } catch (error) {
-    return res.status(400).json({
-      msg: 'Error deleting accommodation.',
-      data: error.message,
-      status: false
-    });
+    console.error(error);
+    res.status(500).json({ message: 'Error deleting accommodation', error });
   }
 };
-
 module.exports = {
   createAccommodation,
   getAllAccommodations,
-  getAccommodationById,
-  updateAccommodationById,
-  deleteAccommodationById
+  getAllPopularCitiesAccommodations,
+  updateAccommodation,
+  deleteAccommodation,
 };
+

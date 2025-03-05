@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const accommodationSchema = new Schema({
+const popularCitiesAccommodationSchema = new Schema({
   sourceLink: { type: String },
   name: { type: String, required: true },
   type: { 
@@ -124,9 +124,8 @@ const accommodationSchema = new Schema({
       types: { type: String },
       value: [{ type: String }],
     }],
-   
+ 
   },
-  isCityPopular: { type: Boolean, default: false } ,
   email: { type: String, required: true }, 
   phoneNumber: { type: String, required: true },
   tags: [{
@@ -150,4 +149,4 @@ const accommodationSchema = new Schema({
   timestamps: true  // Enable automatic `createdAt` and `updatedAt` timestamps
 });
 
-module.exports = mongoose.model('Accommodation', accommodationSchema);
+module.exports = mongoose.model('PopularCitiesAccommodation', popularCitiesAccommodationSchema);
