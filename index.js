@@ -16,7 +16,7 @@ app.use(express.json()); // To parse JSON request bodies
 const { CollegeRouter, ProgramRouter, AccommodationRouter, StreamRouter, AdminRouter, UserRouter, AffiliationRouter, 
   DepartmentsRouter, SearchRouter,EventRouter , AdvertisementRouter , ApiRouter, HostelRouter,  ReviewRouter
    ,AccommodationBookRouter, TestimonialRouter  ,
-  EnquireNowRouter,
+  EnquireNowRouter, CountryRouter, CityRouter,
   FaqRouter, } = require("./routes"); 
 
 const validateApiKey = require('./middlewares/authenticateMiddleware');
@@ -42,6 +42,8 @@ app.use("/api/accommodationBook", AccommodationBookRouter);
 app.use("/api/testimonial", TestimonialRouter);
 app.use("/api/enquireNow", EnquireNowRouter);
 app.use("/api/faq", FaqRouter);
+app.use("/api/country", CountryRouter);
+app.use("/api/city", CityRouter);
 
 
 

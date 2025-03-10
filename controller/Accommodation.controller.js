@@ -1,106 +1,124 @@
-const  {Accommodation } = require('../models');
-const  { PopularCitiesAccommodation } = require('../models');
+const  { Accommodation } = require('../models');
+const  { City } = require('../models');
 
 // Create a new accommodation
 const createAccommodation = async (req, res) => {
   try {
-    const accommodationData = req.body;
-    
-    // First, create the accommodation in the Accommodation collection
-    const newAccommodation = new Accommodation(accommodationData);
-    await newAccommodation.save();
+    const {
+      sourceLink, name, type, description, parentId, pricing,
+      amenities, meta, location, isCityPopular, email, phoneNumber,
+      tags, featureTags, reviewsCount, reviewsRating, destinationDistance, status
+    } = req.body;
 
-    // If 'isCityPopular' is true, create the accommodation in the PopularCitiesAccommodation collection as well
-    if (accommodationData.isCityPopular) {
-      const newPopularCityAccommodation = new PopularCitiesAccommodation(accommodationData);
-      await newPopularCityAccommodation.save();
+    // Check if the city exists based on city_number
+    const city = await City.findOne({ city_number: location.city_number });
+    if (!city) {
+      return res.status(404).json({ message: 'City not found for the given city_number' });
     }
 
-    res.status(201).json({ message: 'Accommodation created successfully', accommodation: newAccommodation });
+    // Create a new accommodation
+    const accommodation = new Accommodation({
+      sourceLink, name, type, description, parentId, pricing,
+      amenities, meta, location, isCityPopular, email, phoneNumber,
+      tags, featureTags, reviewsCount, reviewsRating, destinationDistance, status
+    });
+
+    // Save the accommodation to the database
+    await accommodation.save();
+    res.status(201).json(accommodation);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error creating accommodation', error });
+    res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
 
-// Get all accommodations (from the Accommodation collection)
+// Get all accommodations with filtering and searching
 const getAllAccommodations = async (req, res) => {
   try {
-    const accommodations = await Accommodation.find();
-    res.status(200).json({ accommodations });
+    const { name, type, city_number, isCityPopular } = req.query;
+
+    let query = {};
+
+    // Apply filters based on query parameters
+    if (name) {
+      query.name = { $regex: name, $options: 'i' }; // Case-insensitive search
+    }
+    if (type) {
+      query.type = type;
+    }
+    if (city_number) {
+      query['location.city_number'] = city_number;
+    }
+    if (isCityPopular !== undefined) {
+      query.isCityPopular = isCityPopular === 'true';
+    }
+
+    // Fetch accommodations with the filters applied
+    const accommodations = await Accommodation.find(query).populate('city');
+    res.status(200).json(accommodations);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error fetching accommodations', error });
+    res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
 
-// Get all popular city accommodations (from the PopularCitiesAccommodation collection)
-const getAllPopularCitiesAccommodations = async (req, res) => {
+// Get a single accommodation by ID
+const getAccommodationById = async (req, res) => {
   try {
-    const popularCitiesAccommodations = await PopularCitiesAccommodation.find();
-    res.status(200).json({ popularCitiesAccommodations });
+    const accommodation = await Accommodation.findById(req.params.id).populate('city');
+    if (!accommodation) {
+      return res.status(404).json({ message: 'Accommodation not found' });
+    }
+    res.status(200).json(accommodation);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error fetching popular city accommodations', error });
+    res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
 
-// Update an accommodation (check if isCityPopular is updated, and update accordingly)
+// Update an accommodation by ID
 const updateAccommodation = async (req, res) => {
   try {
-    const accommodationId = req.params.id;
-    const updatedData = req.body;
+    const {
+      sourceLink, name, type, description, parentId, pricing,
+      amenities, meta, location, isCityPopular, email, phoneNumber,
+      tags, featureTags, reviewsCount, reviewsRating, destinationDistance, status
+    } = req.body;
 
-    const updatedAccommodation = await Accommodation.findByIdAndUpdate(accommodationId, updatedData, { new: true });
+    const updatedAccommodation = await Accommodation.findByIdAndUpdate(
+      req.params.id,
+      {
+        sourceLink, name, type, description, parentId, pricing,
+        amenities, meta, location, isCityPopular, email, phoneNumber,
+        tags, featureTags, reviewsCount, reviewsRating, destinationDistance, status
+      },
+      { new: true } // This ensures the updated document is returned
+    );
 
     if (!updatedAccommodation) {
       return res.status(404).json({ message: 'Accommodation not found' });
     }
 
-    // If 'isCityPopular' has changed to true, add to PopularCitiesAccommodation
-    if (updatedData.isCityPopular && !updatedAccommodation.isCityPopular) {
-      const newPopularCityAccommodation = new PopularCitiesAccommodation(updatedAccommodation.toObject());
-      await newPopularCityAccommodation.save();
-    }
-
-    // If 'isCityPopular' has changed to false, remove from PopularCitiesAccommodation
-    if (!updatedData.isCityPopular && updatedAccommodation.isCityPopular) {
-      await PopularCitiesAccommodation.findByIdAndDelete(updatedAccommodation._id);
-    }
-
-    res.status(200).json({ message: 'Accommodation updated successfully', accommodation: updatedAccommodation });
+    res.status(200).json(updatedAccommodation);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error updating accommodation', error });
+    res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
 
-// Delete an accommodation (delete from both collections if isCityPopular is true)
+// Delete an accommodation by ID
 const deleteAccommodation = async (req, res) => {
   try {
-    const accommodationId = req.params.id;
-    const accommodation = await Accommodation.findByIdAndDelete(accommodationId);
-
+    const accommodation = await Accommodation.findByIdAndDelete(req.params.id);
     if (!accommodation) {
       return res.status(404).json({ message: 'Accommodation not found' });
     }
-
-    // If isCityPopular is true, also delete from PopularCitiesAccommodation
-    if (accommodation.isCityPopular) {
-      await PopularCitiesAccommodation.findByIdAndDelete(accommodation._id);
-    }
-
     res.status(200).json({ message: 'Accommodation deleted successfully' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error deleting accommodation', error });
+    res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
+
 module.exports = {
   createAccommodation,
   getAllAccommodations,
-  getAllPopularCitiesAccommodations,
+  getAccommodationById,
   updateAccommodation,
-  deleteAccommodation,
+  deleteAccommodation
 };
-

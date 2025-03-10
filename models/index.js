@@ -18,6 +18,8 @@ const PopularCollege = require("./PopularCollege.model");
 const PopularCitiesAccommodation = require("./PopularCitiesAccommodation.model");
 const Enquiry = require("./EnquireNow.model");
 const Faq = require("./Faq.model");
+const City = require("./City.model");
+const Country = require("./Country.model");
 
 module.exports = {
   College,
@@ -40,5 +42,7 @@ module.exports = {
   PopularCitiesAccommodation,
   Enquiry,
   Faq,
+  City,
+  Country,
 
 }

@@ -107,10 +107,9 @@ const accommodationSchema = new Schema({
     videos: [{ type: String }],
   },
   location: {
-    city: { type: String, required: true },
+    city_number: { type: Number, required: true },  // Changed from city to city_number
     route: { type: String, required: true },
     state: { type: String, required: true },
-    country: { type: String, required: true },
     district: { type: String, required: true },
     locality: { type: String, required: true },
     secondary: { type: String, required: true },
@@ -124,9 +123,8 @@ const accommodationSchema = new Schema({
       types: { type: String },
       value: [{ type: String }],
     }],
-   
   },
-  isCityPopular: { type: Boolean, default: false } ,
+  isCityPopular: { type: Boolean, default: false },
   email: { type: String, required: true }, 
   phoneNumber: { type: String, required: true },
   tags: [{
@@ -149,5 +147,17 @@ const accommodationSchema = new Schema({
 }, {
   timestamps: true  // Enable automatic `createdAt` and `updatedAt` timestamps
 });
+
+// Virtual field to populate city_name from City model
+accommodationSchema.virtual('city', {
+  ref: 'City',              // Referring to the 'City' model
+  localField: 'location.city_number', // Field in Accommodation model
+  foreignField: 'city_number',        // Field in City model
+  justOne: true             // To fetch a single city
+});
+
+// Ensure the virtual fields are included in JSON output
+accommodationSchema.set('toJSON', { virtuals: true });
+accommodationSchema.set('toObject', { virtuals: true });
 
 module.exports = mongoose.model('Accommodation', accommodationSchema);
