@@ -1,10 +1,10 @@
-const  { City } = require('../models'); // Assuming the City model is located in the 'models' folder
-const  { Country } = require('../models'); // Assuming the Country model is located in the 'models' folder
+const { City } = require('../models'); // Assuming the City model is located in the 'models' folder
+const { Country } = require('../models'); // Assuming the Country model is located in the 'models' folder
 
 // Create a new city
 const createCity = async (req, res) => {
   try {
-    const { city_number, city_name, is_popular, country_number, status } = req.body;
+    const { city_number, city_name, is_popular, country_number, status, city_img } = req.body;
 
     // Check if the country exists
     const country = await Country.findOne({ country_number });
@@ -24,6 +24,7 @@ const createCity = async (req, res) => {
       city_name,
       is_popular,
       country_number,
+      city_img: city_img || [], // Default to empty array if no images are provided
       status: status === undefined ? true : status // default to active (true) status
     });
 
@@ -35,10 +36,32 @@ const createCity = async (req, res) => {
   }
 };
 
-// Get all cities (only active cities)
+// Get all cities (can filter by city_number, city_name, and country_number)
 const getAllCities = async (req, res) => {
   try {
-    const cities = await City.find({ status: true }).populate('country'); // Only active cities
+    const { city_number, city_name, country_number } = req.query; // Get filters from query parameters
+
+    // Build the filter object dynamically
+    let filter = { status: true }; // Only active cities
+
+    if (city_number) {
+      filter.city_number = city_number; // Filter by city_number if provided
+    }
+
+    if (city_name) {
+      filter.city_name = { $regex: city_name, $options: 'i' }; // Case-insensitive search by city_name
+    }
+
+    if (country_number) {
+      filter.country_number = country_number; // Filter by country_number if provided
+    }
+
+    // Find cities based on the filter
+    const cities = await City.find(filter)
+      .populate('country')  // Populate country info based on the country_number
+      .exec();
+
+    // Return the cities
     res.status(200).json(cities);
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
@@ -65,7 +88,7 @@ const getCityByNumber = async (req, res) => {
 const updateCity = async (req, res) => {
   try {
     const { city_number } = req.params;
-    const { city_name, is_popular, country_number, status } = req.body;
+    const { city_name, is_popular, country_number, status, city_img } = req.body;
 
     // Check if the country exists
     const country = await Country.findOne({ country_number });
@@ -75,7 +98,7 @@ const updateCity = async (req, res) => {
 
     const city = await City.findOneAndUpdate(
       { city_number, status: true }, // Ensure that only active cities are updated
-      { city_name, is_popular, country_number, status },
+      { city_name, is_popular, country_number, status, city_img },
       { new: true } // Return the updated city
     );
 

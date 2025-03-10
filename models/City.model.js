@@ -18,6 +18,10 @@ const citySchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  city_img: [{  // New field as an array to store multiple images
+    type: String,  // Array of strings (image URLs)
+    default: []     // Default value is an empty array if no images are provided
+  }],
   status: {
     type: Boolean,
     default: true
@@ -25,7 +29,8 @@ const citySchema = new mongoose.Schema({
   deleteFlag: {
     type: Boolean,
     default: false
-  }
+  },
+  
 });
 
 // In this case, we will use a virtual property to allow population of country name based on country_number
