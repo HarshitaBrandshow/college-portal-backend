@@ -117,7 +117,6 @@ const accommodationSchema = new Schema({
     streetNumber: { type: String, required: true },
     latitude: { type: Number, required: true },  // Add latitude
     longitude: { type: Number, required: true }, // Add longitude
-    city_img: [{ type: String }],  // Added city image field here
     features: [{
       name: { type: String },
       types: { type: String },
