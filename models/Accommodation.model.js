@@ -109,7 +109,6 @@ const accommodationSchema = new Schema({
   location: {
     city_number: { type: Number, required: true },  // Changed from city to city_number
     route: { type: String, required: true },
-   
     locality: { type: String, required: true },
     secondary: { type: String, required: true },
     postalCode: { type: String, required: true },
