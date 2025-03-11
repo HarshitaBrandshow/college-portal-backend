@@ -109,8 +109,7 @@ const accommodationSchema = new Schema({
   location: {
     city_number: { type: Number, required: true },  // Changed from city to city_number
     route: { type: String, required: true },
-    state: { type: String, required: true },
-    district: { type: String, required: true },
+   
     locality: { type: String, required: true },
     secondary: { type: String, required: true },
     postalCode: { type: String, required: true },
@@ -123,7 +122,7 @@ const accommodationSchema = new Schema({
       value: [{ type: String }],
     }],
   },
-  isCityPopular: { type: Boolean, default: false },
+  isPopular: { type: Boolean, default: false },
   email: { type: String, required: true }, 
   phoneNumber: { type: String, required: true },
   tags: [{
