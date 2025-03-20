@@ -40,7 +40,7 @@ const accommodationBookingSchema = new mongoose.Schema({
     guarantorName: { type: String, required: true }, // Full name of the guarantor
     guarantorBirthDate: { type: Date, required: true }, // Birth date of the guarantor
     guarantorEmail: { type: String, required: true }, // Email of the guarantor
-    guarantorCode: { type: String, required: true }, // Unique code for the guarantor
+    guarantorCode: { type: String  }, // Unique code for the guarantor
     guarantorMobiles: { type: [String], required: true }, // Array of phone numbers (mobile) of the guarantor
     guarantorAddress: { type: String, required: true }, // Address of the guarantor
     guarantorCountry: { type: String, required: true }, // Country of the guarantor
