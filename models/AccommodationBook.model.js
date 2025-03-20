@@ -24,7 +24,7 @@ const accommodationBookingSchema = new mongoose.Schema({
 
   // University Details
   universityName: { type: String, required: true },
-  courseName: { type: String, required: true },  // Course name (e.g., BCA, MBA, etc.)
+  courseName: { type: String },  // Course name (e.g., BCA, MBA, etc.)
   enrollmentStatus: { type: String, enum: ['Enrolled', 'Not Enrolled'], required: true },
 
   // Room & Stay Details

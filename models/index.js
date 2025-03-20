@@ -15,7 +15,6 @@ const Review = require("./Review.model");
 const AccommodationBooking = require("./AccommodationBook.model");
 const Testimonial = require("./Testimonial.model");
 const PopularCollege = require("./PopularCollege.model");
-const PopularCitiesAccommodation = require("./PopularCitiesAccommodation.model");
 const Enquiry = require("./EnquireNow.model");
 const Faq = require("./Faq.model");
 const City = require("./City.model");
@@ -39,7 +38,6 @@ module.exports = {
   AccommodationBooking,
   Testimonial,
   PopularCollege,
-  PopularCitiesAccommodation,
   Enquiry,
   Faq,
   City,
