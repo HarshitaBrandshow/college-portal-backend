@@ -1,50 +1,56 @@
 const mongoose = require('mongoose');
 
+// Define the schema for the cities model
 const citySchema = new mongoose.Schema({
-  city_number: {
+  id: {  // Unique identifier for the city
     type: Number,
     required: true,
     unique: true
   },
-  city_name: {
+  name: {  // Name of the city
     type: String,
     required: true
   },
-  is_popular: {
-    type: Boolean,
-    default: false
-  },
-  country_number: {  // This will reference the country_number in the Country model
+  state_id: {  // ID of the state the city is in
     type: Number,
     required: true
   },
-  city_img: [{  // New field as an array to store multiple images
-    type: String,  // Array of strings (image URLs)
-    default: []     // Default value is an empty array if no images are provided
-  }],
-  status: {
-    type: Boolean,
-    default: true
+  state_code: {  // Code of the state (e.g., 'NY' for New York)
+    type: String,
+    required: true
   },
-  deleteFlag: {
-    type: Boolean,
-    default: false
+  state_name: {  // Name of the state (e.g., 'New York')
+    type: String,
+    required: true
   },
-  
+  country_id: {  // ID of the country the city is in
+    type: Number,
+    required: true
+  },
+  country_code: {  // Code of the country (e.g., 'US' for United States)
+    type: String,
+    required: true
+  },
+  country_name: {  // Name of the country (e.g., 'United States')
+    type: String,
+    required: true
+  },
+  latitude: {  // Latitude coordinate of the city
+    type: Number,
+    required: true
+  },
+  longitude: {  // Longitude coordinate of the city
+    type: Number,
+    required: true
+  },
+  wikiDataId: {  // Optional field for the WikiData ID of the city
+    type: String,
+    required: false
+  }
 });
 
-// In this case, we will use a virtual property to allow population of country name based on country_number
-citySchema.virtual('country', {
-  ref: 'Country',            // The model to refer to (Country)
-  localField: 'country_number',  // The field in the City model (country_number)
-  foreignField: 'country_number',  // The field in the Country model (country_number)
-  justOne: true               // Return a single document, as one country is related to one city
-});
-
-// Make sure to set the virtual fields in JSON output
-citySchema.set('toJSON', { virtuals: true });
-citySchema.set('toObject', { virtuals: true });
-
-const City = mongoose.model('City', citySchema);
+// Create and export the model named 'Cities'
+const City = mongoose.model('accommodation_cities', citySchema);
 
 module.exports = City;
+
