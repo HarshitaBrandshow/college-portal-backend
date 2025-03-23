@@ -1,6 +1,6 @@
 const College = require("./college.model");
 const Program = require("./program.model");
-const Accommodation = require("./Accommodation.model");
+const Property = require("./Properties.model");
 const Stream = require("./Stream.model");
 const ProgramMapped = require("./ProgramMapped.model");
 const Department = require("./Department.model");
@@ -19,12 +19,14 @@ const Enquiry = require("./EnquireNow.model");
 const Faq = require("./Faq.model");
 const City = require("./City.model");
 const Country = require("./Country.model");
+const University = require("./University.model");
+const PropertyDetail = require("./PropertyDetail.model");
 
 module.exports = {
   College,
   Program,
   Stream,
-  Accommodation,
+  Property,
   ProgramMapped,
   Department,
   Admin,
@@ -42,5 +44,7 @@ module.exports = {
   Faq,
   City,
   Country,
+  University,
+  PropertyDetail,
 
 }

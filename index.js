@@ -13,11 +13,11 @@ app.use(cors()); // To parse JSON request bodies
 app.use(express.json()); // To parse JSON request bodies
 
 // Import Routers
-const { CollegeRouter, ProgramRouter, AccommodationRouter, StreamRouter, AdminRouter, UserRouter, AffiliationRouter, 
+const { CollegeRouter, ProgramRouter, PropertyRouter, StreamRouter, AdminRouter, UserRouter, AffiliationRouter, 
   DepartmentsRouter, SearchRouter,EventRouter , AdvertisementRouter , ApiRouter, HostelRouter,  ReviewRouter
    ,AccommodationBookRouter, TestimonialRouter  ,
   EnquireNowRouter, CountryRouter, CityRouter,
-  FaqRouter, } = require("./routes"); 
+  FaqRouter,  UniversityRouter, PropertyDetailRouter} = require("./routes"); 
 
 const validateApiKey = require('./middlewares/authenticateMiddleware');
 
@@ -26,7 +26,7 @@ app.use(validateApiKey);
 // Routes Started
 app.use("/api/college", CollegeRouter);
 app.use("/api/program", ProgramRouter);
-app.use("/api/accommodation", AccommodationRouter);
+app.use("/api/property", PropertyRouter);
 app.use("/api/stream", StreamRouter);
 app.use("/api/admin", AdminRouter);
 app.use("/api/user" , UserRouter);
@@ -44,6 +44,8 @@ app.use("/api/enquireNow", EnquireNowRouter);
 app.use("/api/faq", FaqRouter);
 app.use("/api/country", CountryRouter);
 app.use("/api/city", CityRouter);
+app.use("/api/university", UniversityRouter);
+app.use("/api/propertyDetail", PropertyDetailRouter);
 
 
 

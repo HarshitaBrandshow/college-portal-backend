@@ -1,6 +1,6 @@
 const CollegeRouter = require("./College.router");
 const ProgramRouter = require("./Program.router");
-const AccommodationRouter = require("./Accommodation.router");
+const PropertyRouter = require("./Property.router");
 const StreamRouter = require("./Stream.router");
 const AdminRouter = require("./Admin.router");
 const UserRouter = require("./User.router");
@@ -18,11 +18,13 @@ const EnquireNowRouter = require("./EnquireNow.router");
 const FaqRouter = require("./Faq.router");
 const CountryRouter = require("./Country.router");
 const CityRouter = require("./City.router");
+const UniversityRouter = require("./University.router");
+const PropertyDetailRouter = require("./PropertyDetail.router");
 
 module.exports = {
   CollegeRouter,
   ProgramRouter,
-  AccommodationRouter,
+  PropertyRouter,
   StreamRouter,
   AdminRouter,
   UserRouter,
@@ -39,5 +41,7 @@ module.exports = {
   EnquireNowRouter,
   FaqRouter,
   CountryRouter,
-  CityRouter
+  CityRouter,
+  UniversityRouter,
+  PropertyDetailRouter
 };

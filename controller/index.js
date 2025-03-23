@@ -1,6 +1,6 @@
 const CollegeController = require("./College.controller");
 const ProgramController = require("./Program.controller");
-const AccommodationController = require("./Accommodation.controller");
+const PropertyController = require("./Property.controller");
 const StreamController = require("./Stream.controller");
 const AdminController = require("./Admin.controller");
 const  UserController = require("./User.controller");
@@ -18,11 +18,13 @@ const EnquireNowController = require("./EnquireNow.controller");
 const FaqController = require("./Faq.controller");
 const CountryController = require("./Country.controller");
 const CityController = require("./City.controller");
+const UniversityController = require("./University.controller");
+const PropertyDetailController = require("./PropertyDetails.controller");
 
 module.exports = {
   CollegeController,
   ProgramController,
-  AccommodationController,
+ PropertyController,
   StreamController,
   AdminController,
   UserController,
@@ -39,5 +41,7 @@ module.exports = {
   EnquireNowController,
   FaqController,
   CountryController,
-  CityController
+  CityController,
+  UniversityController,
+  PropertyDetailController
 };
