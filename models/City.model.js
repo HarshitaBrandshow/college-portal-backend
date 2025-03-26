@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 // Define the schema for the cities model
 const citySchema = new mongoose.Schema({
-  id: {  // Unique identifier for the city
+  city_id: {  // Unique identifier for the city, renamed from 'id'
     type: Number,
     required: true,
     unique: true
@@ -46,6 +46,15 @@ const citySchema = new mongoose.Schema({
   wikiDataId: {  // Optional field for the WikiData ID of the city
     type: String,
     required: false
+  },
+  isPopular: {  // Boolean field to mark if the city is popular
+    type: Boolean,
+    required: true,
+    default: false  // Default value can be false if not specified
+  },
+  city_img: {  // Array of strings to store image URLs or file paths
+    type: [String],
+    required: false  // This can be optional, depending on your use case
   }
 });
 
@@ -53,4 +62,3 @@ const citySchema = new mongoose.Schema({
 const City = mongoose.model('accommodation_cities', citySchema);
 
 module.exports = City;
-

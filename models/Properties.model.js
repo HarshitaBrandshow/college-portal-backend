@@ -132,11 +132,10 @@ const propertySchema = new Schema({
   videos: [
     { type: String }
   ],
-
-
   location_coordinates: { type: String },
 
   location: {
+    city_id: { type: Number },
     name: { type: String },
     route: {
       long_name: { type: String },
@@ -243,6 +242,13 @@ const propertySchema = new Schema({
   images_with_featured: { type: Schema.Types.Mixed, default: null },
   offers_count: { type: Number, default: 1 }
 });
+
+// Add a method to populate city information when querying for properties
+propertySchema.methods.populateCityData = async function() {
+  // Populate city_id with data from the Accommodation-Cities collection
+  await this.populate('location.city_id').execPopulate();
+};
+
 
 const Property = mongoose.model('Properties', propertySchema);
 

@@ -1,18 +1,18 @@
-const  { City } = require('../models'); // Import the city model
+const { City } = require('../models'); // Import the city model
 
 // Create a new city (Create)
 const createCity = async (req, res) => {
-  const { id, name, state_id, state_code, state_name, country_id, country_code, country_name, latitude, longitude, wikiDataId } = req.body;
+  const { city_id, name, state_id, state_code, state_name, country_id, country_code, country_name, latitude, longitude, wikiDataId, isPopular, city_img } = req.body;
 
   // Validate the input data
-  if (!id || !name || !state_id || !state_code || !state_name || !country_id || !country_code || !country_name || !latitude || !longitude) {
+  if (!city_id || !name || !state_id || !state_code || !state_name || !country_id || !country_code || !country_name || !latitude || !longitude) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
     // Create a new city document
     const newCity = new City({
-      id,
+      city_id,
       name,
       state_id,
       state_code,
@@ -23,6 +23,8 @@ const createCity = async (req, res) => {
       latitude,
       longitude,
       wikiDataId,
+      isPopular: isPopular || false, // Default to false if not provided
+      city_img: city_img || [] // Default to empty array if not provided
     });
 
     // Save the city to the database
@@ -51,7 +53,7 @@ const getAllCities = async (req, res) => {
     if (search) {
       query = {
         $or: [
-          { id: { $regex: search, $options: 'i' } }, // Case-insensitive search on 'id'
+          { city_id: { $regex: search, $options: 'i' } }, // Case-insensitive search on 'city_id'
           { name: { $regex: search, $options: 'i' } }, // Case-insensitive search on 'name'
           { country_id: { $regex: search, $options: 'i' } }, // Case-insensitive search on 'country_id'
           { country_name: { $regex: search, $options: 'i' } }, // Case-insensitive search on 'country_name'
@@ -81,12 +83,12 @@ const getAllCities = async (req, res) => {
   }
 };
 
-// Get a specific city by ID (Read Specific)
+// Get a specific city by city_id (Read Specific)
 const getCityById = async (req, res) => {
-  const { id } = req.params;
+  const { city_id } = req.params;
 
   try {
-    const city = await City.findOne({ id }); // Find a city by its ID
+    const city = await City.findOne({ city_id }); // Find a city by its city_id
     if (!city) {
       return res.status(404).json({ message: 'City not found' });
     }
@@ -97,15 +99,28 @@ const getCityById = async (req, res) => {
   }
 };
 
-// Update a city by ID (Update)
+// Update a city by city_id (Update)
 const updateCity = async (req, res) => {
-  const { id } = req.params;
-  const { name, state_id, state_code, state_name, country_id, country_code, country_name, latitude, longitude, wikiDataId } = req.body;
+  const { city_id } = req.params;
+  const { name, state_id, state_code, state_name, country_id, country_code, country_name, latitude, longitude, wikiDataId, isPopular, city_img } = req.body;
 
   try {
     const updatedCity = await City.findOneAndUpdate(
-      { id },  // Find city by id
-      { name, state_id, state_code, state_name, country_id, country_code, country_name, latitude, longitude, wikiDataId },
+      { city_id },  // Find city by city_id
+      { 
+        name, 
+        state_id, 
+        state_code, 
+        state_name, 
+        country_id, 
+        country_code, 
+        country_name, 
+        latitude, 
+        longitude, 
+        wikiDataId,
+        isPopular,
+        city_img 
+      },
       { new: true }  // Return the updated city
     );
 
@@ -123,12 +138,12 @@ const updateCity = async (req, res) => {
   }
 };
 
-// Delete a city by ID (Delete)
+// Delete a city by city_id (Delete)
 const deleteCity = async (req, res) => {
-  const { id } = req.params;
+  const { city_id } = req.params;
 
   try {
-    const deletedCity = await City.findOneAndDelete({ id });  // Find and delete the city by ID
+    const deletedCity = await City.findOneAndDelete({ city_id });  // Find and delete the city by city_id
     if (!deletedCity) {
       return res.status(404).json({ message: 'City not found' });
     }
