@@ -9,7 +9,7 @@ router.post('/create', CountryController.createCountry);
 router.get('/countries', CountryController.getAllCountries);
 
 // Get a single country by country_number
-router.get('/:country_number', CountryController.getCountryByNumber);
+router.get('/:country_number', CountryController.getCountryById);
 
 // Update a country by country_number
 router.put('/:country_number', CountryController.updateCountry);
