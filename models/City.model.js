@@ -24,10 +24,11 @@ const citySchema = new mongoose.Schema({
     required: true
   },
   country_id: {
-    type: Number,
-    ref: 'Country', 
+    type: mongoose.Schema.Types.ObjectId,  // Change from Number to ObjectId
+    ref: 'Country',
     required: true
   },
+  
   latitude: {
     type: Number,
     required: true
@@ -65,6 +66,6 @@ citySchema.methods.populateCountryData = async function () {
 };
 
 // Create and export the model named 'Cities'
-const City = mongoose.model('accommodation_cities', citySchema);
+const City = mongoose.model('cities', citySchema);
 
 module.exports = City;
