@@ -1,160 +1,73 @@
-const { City } = require('../models'); // Import the city model
+const  { City } = require('../models'); 
 
-// Create a new city (Create)
+// Create a new city
 const createCity = async (req, res) => {
-  const { city_id, name, state_id, state_code, state_name, country_id, country_code, country_name, latitude, longitude, wikiDataId, isPopular, city_img } = req.body;
-
-  // Validate the input data
-  if (!city_id || !name || !state_id || !state_code || !state_name || !country_id || !country_code || !country_name || !latitude || !longitude) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
-
   try {
-    // Create a new city document
-    const newCity = new City({
-      city_id,
-      name,
-      state_id,
-      state_code,
-      state_name,
-      country_id,
-      country_code,
-      country_name,
-      latitude,
-      longitude,
-      wikiDataId,
-      isPopular: isPopular || false, // Default to false if not provided
-      city_img: city_img || [] // Default to empty array if not provided
-    });
-
-    // Save the city to the database
+    const newCity = new City(req.body);
     await newCity.save();
-
-    // Respond with the created city data
-    res.status(201).json({
-      message: 'City created successfully',
-      city: newCity,
-    });
+    res.status(201).json({ success: true, message: 'City created successfully', data: newCity });
   } catch (error) {
-    console.error('Error creating city:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Get all cities (Read All)
+//get all cities 
 const getAllCities = async (req, res) => {
-  const { search, ...filters } = req.query; // Destructure search and other filters from query parameters
-
   try {
-    // Initialize the query object
-    let query = {};
+    let { city_id, name, country_id, isPopular } = req.query;
+    let filter = {};
 
-    // If 'search' parameter is provided, use it to search across multiple fields
-    if (search) {
-      query = {
-        $or: [
-          { city_id: { $regex: search, $options: 'i' } }, // Case-insensitive search on 'city_id'
-          { name: { $regex: search, $options: 'i' } }, // Case-insensitive search on 'name'
-          { country_id: { $regex: search, $options: 'i' } }, // Case-insensitive search on 'country_id'
-          { country_name: { $regex: search, $options: 'i' } }, // Case-insensitive search on 'country_name'
-        ],
-      };
-    }
+    // Apply filters if provided
+    if (city_id) filter.city_id = city_id;
+    if (name) filter.name = { $regex: new RegExp(name, "i") }; 
+    if (country_id) filter.country_id = country_id;
+    if (isPopular) filter.isPopular = isPopular === "true"; 
 
-    // If filters are provided (other than search), add them to the query
-    const filterQuery = Object.keys(filters).reduce((query, key) => {
-      if (filters[key]) {
-        query[key] = filters[key]; // Dynamically add filter conditions to query
-      }
-      return query;
-    }, {});
+    // Fetch cities with filters and populate country details
+    const cities = await City.find(filter).populate('country_id');
 
-    // Combine the search and filter query (if any)
-    query = { ...query, ...filterQuery };
-
-    // Get the cities from the database based on the query
-    const cities = await City.find(query).exec(); // No pagination, just filter based on the query
-
-    // Respond with the result
-    res.status(200).json(cities); // Return the cities list
+    res.status(200).json({ success: true, data: cities });
   } catch (error) {
-    console.error('Error fetching cities:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Get a specific city by city_id (Read Specific)
+// Get a single city by ID
 const getCityById = async (req, res) => {
-  const { city_id } = req.params;
-
   try {
-    const city = await City.findOne({ city_id }); // Find a city by its city_id
+    const city = await City.findById(req.params.id).populate('country_id');
     if (!city) {
-      return res.status(404).json({ message: 'City not found' });
+      return res.status(404).json({ success: false, message: 'City not found' });
     }
-    res.status(200).json(city); // Respond with the city data
+    res.status(200).json({ success: true, data: city });
   } catch (error) {
-    console.error('Error fetching city:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Update a city by city_id (Update)
+// Update a city
 const updateCity = async (req, res) => {
-  const { city_id } = req.params;
-  const { name, state_id, state_code, state_name, country_id, country_code, country_name, latitude, longitude, wikiDataId, isPopular, city_img } = req.body;
-
   try {
-    const updatedCity = await City.findOneAndUpdate(
-      { city_id },  // Find city by city_id
-      { 
-        name, 
-        state_id, 
-        state_code, 
-        state_name, 
-        country_id, 
-        country_code, 
-        country_name, 
-        latitude, 
-        longitude, 
-        wikiDataId,
-        isPopular,
-        city_img 
-      },
-      { new: true }  // Return the updated city
-    );
-
+    const updatedCity = await City.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedCity) {
-      return res.status(404).json({ message: 'City not found' });
+      return res.status(404).json({ success: false, message: 'City not found' });
     }
-
-    res.status(200).json({
-      message: 'City updated successfully',
-      city: updatedCity,
-    });
+    res.status(200).json({ success: true, message: 'City updated successfully', data: updatedCity });
   } catch (error) {
-    console.error('Error updating city:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Delete a city by city_id (Delete)
+// Delete a city
 const deleteCity = async (req, res) => {
-  const { city_id } = req.params;
-
   try {
-    const deletedCity = await City.findOneAndDelete({ city_id });  // Find and delete the city by city_id
+    const deletedCity = await City.findByIdAndDelete(req.params.id);
     if (!deletedCity) {
-      return res.status(404).json({ message: 'City not found' });
+      return res.status(404).json({ success: false, message: 'City not found' });
     }
-
-    res.status(200).json({
-      message: 'City deleted successfully',
-      city: deletedCity,
-    });
+    res.status(200).json({ success: true, message: 'City deleted successfully' });
   } catch (error) {
-    console.error('Error deleting city:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
