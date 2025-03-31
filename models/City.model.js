@@ -51,12 +51,12 @@ const citySchema = new mongoose.Schema({
   },
   c_code: {
     type: String,
-    required: true
+    required: false
   },
   c_name : {
     type: String,
-    required: true
-  },
+    required: false
+  }
 });
 
 // Add a method to populate country data
