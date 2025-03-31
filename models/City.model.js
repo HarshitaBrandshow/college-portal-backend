@@ -48,7 +48,15 @@ const citySchema = new mongoose.Schema({
   city_img: {
     type: [String],
     required: false
-  }
+  },
+  c_code: {
+    type: String,
+    required: true
+  },
+  c_name : {
+    type: String,
+    required: true
+  },
 });
 
 // Add a method to populate country data

@@ -1,9 +1,32 @@
-const  { City } = require('../models'); 
+const { City } = require('../models');
 
 // Create a new city
 const createCity = async (req, res) => {
   try {
-    const newCity = new City(req.body);
+    const { city_id, name, state_id, state_code, state_name, country_id, latitude, longitude, wikiDataId, isPopular, city_img, c_code, c_name } = req.body;
+
+    // Ensure city_id is unique
+    const existingCity = await City.findOne({ city_id });
+    if (existingCity) {
+      return res.status(400).json({ success: false, message: 'City ID already exists' });
+    }
+
+    const newCity = new City({
+      city_id,
+      name,
+      state_id,
+      state_code,
+      state_name,
+      country_id,
+      latitude,
+      longitude,
+      wikiDataId,
+      isPopular,
+      city_img,
+      c_code,
+      c_name
+    });
+
     await newCity.save();
     res.status(201).json({ success: true, message: 'City created successfully', data: newCity });
   } catch (error) {
@@ -11,16 +34,16 @@ const createCity = async (req, res) => {
   }
 };
 
-//get all cities 
+// Get all cities with optional filters
 const getAllCities = async (req, res) => {
   try {
     let { city_id, name, country_id, isPopular } = req.query;
     let filter = {};
 
     // Apply filters if provided
-    if (city_id) filter.city_id = city_id;
+    if (city_id) filter.city_id = Number(city_id); // Convert to number
     if (name) filter.name = { $regex: new RegExp(name, "i") }; 
-    if (country_id) filter.country_id = country_id;
+    if (country_id) filter.country_id = Number(country_id); 
     if (isPopular) filter.isPopular = isPopular === "true"; 
 
     // Fetch cities with filters and populate country details
@@ -32,10 +55,10 @@ const getAllCities = async (req, res) => {
   }
 };
 
-// Get a single city by ID
+// Get a single city by city_id
 const getCityById = async (req, res) => {
   try {
-    const city = await City.findById(req.params.id).populate('country_id');
+    const city = await City.findOne({ city_id: req.params.city_id }).populate('country_id');
     if (!city) {
       return res.status(404).json({ success: false, message: 'City not found' });
     }
@@ -45,26 +68,34 @@ const getCityById = async (req, res) => {
   }
 };
 
-// Update a city
+// Update a city by city_id
 const updateCity = async (req, res) => {
   try {
-    const updatedCity = await City.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedCity = await City.findOneAndUpdate(
+      { city_id: req.params.city_id },
+      req.body,
+      { new: true, runValidators: true }
+    );
+
     if (!updatedCity) {
       return res.status(404).json({ success: false, message: 'City not found' });
     }
+
     res.status(200).json({ success: true, message: 'City updated successfully', data: updatedCity });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Delete a city
+// Delete a city by city_id
 const deleteCity = async (req, res) => {
   try {
-    const deletedCity = await City.findByIdAndDelete(req.params.id);
+    const deletedCity = await City.findOneAndDelete({ city_id: req.params.city_id });
+
     if (!deletedCity) {
       return res.status(404).json({ success: false, message: 'City not found' });
     }
+
     res.status(200).json({ success: true, message: 'City deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
